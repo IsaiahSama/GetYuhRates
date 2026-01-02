@@ -1,6 +1,6 @@
 # GetYuhRates
 
-GetYuhRates is an automation driven script, designed to be run once daily automatically, to retrieve a configurable set of currency exchange rates, and share them with a configurable set of emails.
+GetYuhRates is an automation driven script, designed to be run once daily automatically, to retrieve a configurable set of currency exchange rates, and aggregate them into an easy to view format such as PDF or CSV file. These files can then be downloaded, or be configured to be sent to a group of emails automatically.
 
 This consists of three (3) folders:
 
@@ -12,7 +12,7 @@ Where:
 
 - web_application/ contains a deployable website to interact with the service via a user interface
 - cli/ contains a command line tool, that allows you to interact with the service, and run direct commands. This is the ideal method of using the service.
-- package/ contains the core functionality of the service that will be used by the CLI and Web Application.
+- cl_package/ contains the core functionality of the service that will be used by the CLI and Web Application.
 
 NOTE: This project will require a Python installation to run.
 
