@@ -1,0 +1,28 @@
+source:
+  - GBP
+  - USD
+
+currencies:
+  - BBD
+  - EUR
+  - CAD
+  - PLN
+
+always_download: N
+output_folder: ./reports/
+
+# Options are: CSV, PDF
+output_format: CSV 
+
+# Email Configuration
+
+send_emails: true
+sender_email: youremail@mail.com
+
+recipients:
+  - user1@mail.com
+  - user2@mail.com
+  - user3@mail.com
+
+subject_title: "Today's Currency Rates"
+email_body: "Here are the currency rates for today!"

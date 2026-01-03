@@ -10,9 +10,9 @@ This project contains three (3) sets of code.
 1. CLI Tool: A Python CLI program developed using Typer, that uses the developed package.
 1. Web Application: Web Application developed using FastAPI, that uses the developed package, and a user interface to configuration settings.
 
-The CurrencyLayer (CL) package, will be stored in the `./cl_package` directory.
-The CLI tool will be stored in the `./cli` directory.
-The Web application will be stored in the `./web/` directory.
+The GetYuhRates package, will be stored in the `./getyuhrates_package` directory.
+The CLI tool will be stored in the `./getyuhrates_cli` directory.
+The Web application will be stored in the `./getyuhrates_web/` directory.
 
 Each of these projects will also have their own `CLAUDE.md` file containing information specific to that project.
 
@@ -42,6 +42,24 @@ In development, the following tools will be used:
 
 - FastAPI
 - Pydantic
+
+# Coding Guidelines
+
+All Python code should be `typed`, avoiding the use of `Any` whenever possible.
+All Python functions & modules should be documented using Google style docstrings. For example:
+
+```py
+def some_func(name: str) -> None:
+    """One line summary
+
+    Args:
+        name (str): One line summary.
+
+    Returns:
+        None: One line reason
+    """
+    pass
+```
 
 # Workflow
 

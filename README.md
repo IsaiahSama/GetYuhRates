@@ -4,15 +4,15 @@ GetYuhRates is an automation driven script, designed to be run once daily automa
 
 This consists of three (3) folders:
 
-- web_application/
-- cli/
-- package/
+- getyuhrates_web/
+- getyuhrates_cli/
+- getyuhrates_package/
 
 Where:
 
-- web_application/ contains a deployable website to interact with the service via a user interface
-- cli/ contains a command line tool, that allows you to interact with the service, and run direct commands. This is the ideal method of using the service.
-- cl_package/ contains the core functionality of the service that will be used by the CLI and Web Application.
+- getyuhrates_web/ contains a deployable website to interact with the service via a user interface
+- getyuhrates_cli/ contains a command line tool, that allows you to interact with the service, and run direct commands. This is the ideal method of using the service.
+- getyuhrates_package/ contains the core functionality of the service that will be used by the CLI and Web Application.
 
 NOTE: This project will require a Python installation to run.
 
@@ -29,7 +29,7 @@ These include:
 To use the Web application for this project, follow the following steps:
 
 1. Ensure Python 3.11 or later is installed on the system.
-1. From the root (this folder), use `cd ./web_application/`
+1. From the root (this folder), use `cd ./getyuhrates_web/`
 1. [OPTIONAL]: Create a virtual environment with `python -m venv .venv` and activate with `source .venv/bin/activate` or `source .venv/Scripts/Activate`
 1. Install the dependencies with `pip install -r requirements.txt`
 1. Run: `cp .env.example .env` and fill in the `CURRENCYLAYER_API_KEY` value with your Currency Layer API Key.
@@ -42,7 +42,7 @@ To use the Web application for this project, follow the following steps:
 The CLI tool can be used as follows:
 
 1. Ensure Python 3.11 or later is installed on the system.
-1. From the root (this folder), use `cd ./cli/`
+1. From the root (this folder), use `cd ./getyuhrates_cli/`
 1. [OPTIONAL]: Create a virtual environment with `python -m venv .venv` and activate with `source .venv/bin/activate` or `source .venv/Scripts/Activate`
 1. Install the dependencies with `pip install -r requirements.txt`
 1. Run: `cp .env.example .env` and fill in the `CURRENCYLAYER_API_KEY` value with your Currency Layer API Key.
