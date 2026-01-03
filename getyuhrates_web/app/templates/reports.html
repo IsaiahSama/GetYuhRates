@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - GetYuhRates{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h2><i class="bi bi-file-earmark-text"></i> Saved Reports</h2>
+        <p class="text-muted">Manage your saved currency rate reports</p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        {% if reports %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">All Reports ({{ reports|length }})</h5>
+                <span class="badge bg-primary">{{ reports|length }} files</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="reportsTable">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr id="report-{{ loop.index }}">
+                                <td>
+                                    <i class="bi bi-file-earmark-text text-primary"></i>
+                                    {{ report.filename }}
+                                </td>
+                                <td>{{ (report.size / 1024)|round(2) }} KB</td>
+                                <td>{{ report.modified }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/reports/download/{{ report.filename }}"
+                                           class="btn btn-sm btn-primary"
+                                           title="Download">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger"
+                                                onclick="deleteReport('{{ report.filename }}', {{ loop.index }})"
+                                                title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                <h4 class="mt-3">No Reports Found</h4>
+                <p class="text-muted">You haven't generated any reports yet.</p>
+                <a href="/rates" class="btn btn-primary">
+                    <i class="bi bi-graph-up"></i> Get Exchange Rates
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if reports %}
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Tips</h6>
+                <ul class="small mb-0">
+                    <li>Click the download button to download a report</li>
+                    <li>Click the delete button to permanently remove a report</li>
+                    <li>Reports are stored in the configured output folder</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="deleteFilename"></strong>?
+                <br>This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let deleteFilename = '';
+let deleteRowIndex = 0;
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+function deleteReport(filename, rowIndex) {
+    deleteFilename = filename;
+    deleteRowIndex = rowIndex;
+    document.getElementById('deleteFilename').textContent = filename;
+    deleteModal.show();
+}
+
+document.getElementById('confirmDelete').addEventListener('click', async function() {
+    try {
+        const response = await fetch(`/reports/delete/${encodeURIComponent(deleteFilename)}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Remove row from table
+            const row = document.getElementById(`report-${deleteRowIndex}`);
+            row.remove();
+
+            // Check if table is empty
+            const tbody = document.querySelector('#reportsTable tbody');
+            if (tbody.children.length === 0) {
+                location.reload();
+            }
+
+            deleteModal.hide();
+            showAlert(data.message, 'success');
+        } else {
+            deleteModal.hide();
+            showAlert(data.detail || 'Failed to delete report', 'danger');
+        }
+    } catch (error) {
+        deleteModal.hide();
+        showAlert('Error: ' + error.message, 'danger');
+    }
+});
+</script>
+{% endblock %}

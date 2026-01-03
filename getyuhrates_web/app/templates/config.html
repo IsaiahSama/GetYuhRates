@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - GetYuhRates{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h2><i class="bi bi-gear"></i> Configuration Settings</h2>
+        <p class="text-muted">Manage your application settings</p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Application Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form id="configForm" method="POST" action="/config/update">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="source" class="form-label">
+                                    Default Source Currencies <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="source" name="source" multiple required size="5">
+                                    {% for currency in available_currencies %}
+                                    <option value="{{ currency }}" {% if currency in config.source %}selected{% endif %}>
+                                        {{ currency }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currencies" class="form-label">
+                                    Default Target Currencies <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="currencies" name="currencies" multiple required size="5">
+                                    {% for currency in available_currencies %}
+                                    <option value="{{ currency }}" {% if currency in config.currencies %}selected{% endif %}>
+                                        {{ currency }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="always_download" class="form-label">
+                                    Always Download <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="always_download" name="always_download" required>
+                                    <option value="Y" {% if config.always_download == 'Y' %}selected{% endif %}>Yes</option>
+                                    <option value="N" {% if config.always_download == 'N' %}selected{% endif %}>No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="output_format" class="form-label">
+                                    Output Format <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="output_format" name="output_format" required>
+                                    <option value="CSV" {% if config.output_format == 'CSV' %}selected{% endif %}>CSV</option>
+                                    <option value="PDF" {% if config.output_format == 'PDF' %}selected{% endif %}>PDF</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="output_folder" class="form-label">
+                            Output Folder <span class="badge bg-secondary">Read-only</span>
+                        </label>
+                        <input type="text" class="form-control" id="output_folder" value="{{ config.output_folder }}" disabled>
+                        <div class="form-text">This setting cannot be modified from the web interface</div>
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">Email Settings</h5>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="send_emails" name="send_emails"
+                               {% if config.send_emails %}checked{% endif %}>
+                        <label class="form-check-label" for="send_emails">
+                            Enable email notifications
+                        </label>
+                    </div>
+
+                    <div id="emailSettings" style="{% if not config.send_emails %}display: none;{% endif %}">
+                        <div class="mb-3">
+                            <label for="sender_email" class="form-label">
+                                Sender Email <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="sender_email" name="sender_email"
+                                   value="{{ config.sender_email }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="recipients" class="form-label">
+                                Recipients <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="recipients" name="recipients" rows="3" required>{{ config.recipients|join('\n') }}</textarea>
+                            <div class="form-text">One email address per line</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject_title" class="form-label">
+                                Email Subject <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="subject_title" name="subject_title"
+                                   value="{{ config.subject_title }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email_body" class="form-label">
+                                Email Body <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="email_body" name="email_body" rows="3" required>{{ config.email_body }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Configuration Guide</h6>
+                <ul class="small">
+                    <li><strong>Source Currencies:</strong> Default currencies to convert from</li>
+                    <li><strong>Target Currencies:</strong> Default currencies to convert to</li>
+                    <li><strong>Always Download:</strong> Automatically save all requests to files</li>
+                    <li><strong>Output Format:</strong> File format for saved reports (CSV or PDF)</li>
+                    <li><strong>Output Folder:</strong> Where reports are stored (cannot be changed here)</li>
+                    <li><strong>Email Settings:</strong> Configure automated email notifications</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Current Configuration</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row small mb-0">
+                    <dt class="col-sm-6">Source Currencies:</dt>
+                    <dd class="col-sm-6">{{ config.source|join(', ') }}</dd>
+
+                    <dt class="col-sm-6">Target Currencies:</dt>
+                    <dd class="col-sm-6">{{ config.currencies|join(', ') }}</dd>
+
+                    <dt class="col-sm-6">Output Format:</dt>
+                    <dd class="col-sm-6">{{ config.output_format }}</dd>
+
+                    <dt class="col-sm-6">Email Enabled:</dt>
+                    <dd class="col-sm-6">{% if config.send_emails %}Yes{% else %}No{% endif %}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle email settings visibility
+document.getElementById('send_emails').addEventListener('change', function() {
+    const emailSettings = document.getElementById('emailSettings');
+    if (this.checked) {
+        emailSettings.style.display = 'block';
+    } else {
+        emailSettings.style.display = 'none';
+    }
+});
+
+// Handle form submission
+document.getElementById('configForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const source = formData.getAll('source');
+    const currencies = formData.getAll('currencies');
+    const always_download = formData.get('always_download');
+    const output_format = formData.get('output_format');
+    const send_emails = formData.get('send_emails') === 'on';
+    const sender_email = formData.get('sender_email');
+    const recipients = formData.get('recipients').split('\n').filter(e => e.trim());
+    const subject_title = formData.get('subject_title');
+    const email_body = formData.get('email_body');
+
+    try {
+        const response = await fetch('/config/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                source: source,
+                currencies: currencies,
+                always_download: always_download,
+                output_format: output_format,
+                send_emails: send_emails,
+                sender_email: sender_email,
+                recipients: recipients,
+                subject_title: subject_title,
+                email_body: email_body
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert('Configuration saved successfully!', 'success');
+            // Reload page after a short delay to show updated config
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert(data.detail || 'Failed to save configuration', 'danger');
+        }
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+    }
+});
+</script>
+{% endblock %}

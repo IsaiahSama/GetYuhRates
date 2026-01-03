@@ -1,7 +1,23 @@
 [project]
 name = "getyuhrates-cli"
 version = "0.1.0"
-description = "Add your description here"
+description = "CLI tool for retrieving currency exchange rates using the GetYuhRates package"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "typer>=0.12.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+getyuhrates = "main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+pythonVersion = "3.12"

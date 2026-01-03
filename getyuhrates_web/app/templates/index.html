@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Home - GetYuhRates{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">
+                <i class="bi bi-currency-exchange"></i> Welcome to GetYuhRates
+            </h1>
+            <p class="lead">Your web interface for currency exchange rate management</p>
+            <hr class="my-4">
+            <p>Get real-time currency exchange rates, manage reports, and configure your settings all in one place.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-graph-up text-primary"></i> Get Exchange Rates
+                </h5>
+                <p class="card-text">Retrieve live currency exchange rates from the CurrencyLayer API for multiple source and target currencies.</p>
+                <a href="/rates" class="btn btn-primary">Get Rates</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-file-earmark-text text-success"></i> Manage Reports
+                </h5>
+                <p class="card-text">View, download, and manage your saved currency rate reports stored in the reports directory.</p>
+                <a href="/reports" class="btn btn-success">View Reports</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-gear text-info"></i> Configure Settings
+                </h5>
+                <p class="card-text">Manage your application settings including default currencies, output formats, and email notifications.</p>
+                <a href="/config" class="btn btn-info">Settings</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if recent_reports %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Recent Reports
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in recent_reports %}
+                            <tr>
+                                <td><i class="bi bi-file-earmark-text"></i> {{ report.filename }}</td>
+                                <td>{{ (report.size / 1024)|round(2) }} KB</td>
+                                <td>{{ report.modified }}</td>
+                                <td>
+                                    <a href="/reports/download/{{ report.filename }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="/reports" class="btn btn-outline-primary btn-sm">View All Reports</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-info-circle"></i> How It Works
+                </h5>
+                <ol>
+                    <li><strong>Get Rates:</strong> Select source and target currencies to retrieve live exchange rates from CurrencyLayer API</li>
+                    <li><strong>Save Reports:</strong> Optionally save your results as CSV files for later reference</li>
+                    <li><strong>Manage Reports:</strong> Browse, download, or delete saved reports from the Reports page</li>
+                    <li><strong>Configure:</strong> Set default currencies and other preferences in the Settings page</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

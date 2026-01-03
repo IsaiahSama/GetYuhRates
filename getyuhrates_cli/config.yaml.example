@@ -26,3 +26,9 @@ recipients:
 
 subject_title: "Today's Currency Rates"
 email_body: "Here are the currency rates for today!"
+
+# Rate Limiting Configuration
+rate_limit:
+  enabled: true
+  delay_seconds: 1.0  # Delay between API requests
+  respect_headers: true  # Adjust based on API response headers
