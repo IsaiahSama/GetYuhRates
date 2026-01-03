@@ -44,7 +44,7 @@ class GetYuhRates:
     Example:
         >>> client = GetYuhRates()
         >>> results = client.get_rates(
-        ...     source=["USD", "GBP"],
+        ...     sources=["USD", "GBP"],
         ...     currencies=["EUR", "CAD"]
         ... )
         >>> for result in results:
@@ -69,7 +69,7 @@ class GetYuhRates:
 
     async def get_rates_async(
         self,
-        source: list[str],
+        sources: list[str],
         currencies: list[str],
         output_path: str | os.PathLike[str] | None = None,
         writer: AbstractWriter | None = None,
@@ -81,11 +81,11 @@ class GetYuhRates:
         made sequentially with a delay between them. This delay is configurable
         via the `GETYUHRATES_REQUEST_DELAY_SECONDS` environment variable.
 
-        If a source and target currency are identical (e.g., source=["USD"],
+        If a sources and target currency are identical (e.g., source=["USD"],
         currencies=["USD"]), it returns a rate of 1.0 without an API call.
 
         Args:
-            source (list[str]): List of source currency codes (e.g., ["USD", "GBP"]).
+            sources (list[str]): List of source currency codes (e.g., ["USD", "GBP"]).
                 Each source will result in a separate API request.
             currencies (list[str]): List of target currency codes to get rates for
                 (e.g., ["EUR", "CAD", "JPY"]). Applied to all source currencies.
@@ -113,7 +113,7 @@ class GetYuhRates:
             >>> for result in results:
             ...     print(f"{result['source']}: {result['rates']}")
         """
-        if not source:
+        if not sources:
             raise ValueError("Source currency list cannot be empty")
         if not currencies:
             raise ValueError("Target currencies list cannot be empty")
@@ -132,11 +132,11 @@ class GetYuhRates:
 
         # Process sources sequentially with a delay to avoid rate-limiting
         results: list[CurrencyResult] = []
-        for i, src in enumerate(source):
+        for i, src in enumerate(sources):
             result = await self._fetch_rates_async(src, currencies)
             results.append(result)
             # Do not sleep after the last request
-            if i < len(source) - 1:
+            if i < len(sources) - 1:
                 await asyncio.sleep(delay_seconds)
 
         # Write to file if output path is provided
@@ -234,7 +234,7 @@ class GetYuhRates:
 
     def get_rates(
         self,
-        source: list[str],
+        sources: list[str],
         currencies: list[str],
         output_path: str | os.PathLike[str] | None = None,
         writer: AbstractWriter | None = None,
@@ -242,11 +242,11 @@ class GetYuhRates:
         """Retrieve currency exchange rates synchronously.
 
         Fetches live currency exchange rates from the CurrencyLayer API for
-        multiple source currencies. This is a synchronous wrapper around
+        multiple sources currencies. This is a synchronous wrapper around
         get_rates_async that runs the async method in an event loop.
 
         Args:
-            source (list[str]): List of source currency codes (e.g., ["USD", "GBP"]).
+            sources (list[str]): List of source currency codes (e.g., ["USD", "GBP"]).
             currencies (list[str]): List of target currency codes (e.g., ["EUR", "CAD"]).
             output_path (str | os.PathLike[str] | None): Optional directory path
                 to save results. Default is None (no file output).
@@ -254,16 +254,16 @@ class GetYuhRates:
                 Default is CSVWriter if None provided and output_path is set.
 
         Returns:
-            list[CurrencyResult]: List of results, one per source currency.
+            list[CurrencyResult]: List of results, one per sources currency.
 
         Raises:
-            ValueError: If source or currencies lists are empty.
+            ValueError: If sources or currencies lists are empty.
             requests.RequestException: If there are network issues with the API request.
 
         Example:
             >>> client = GetYuhRates()
             >>> results = client.get_rates(
-            ...     source=["USD"],
+            ...     sources=["USD"],
             ...     currencies=["EUR", "GBP", "CAD"],
             ...     output_path="./output"
             ... )
@@ -271,7 +271,7 @@ class GetYuhRates:
             {'USDEUR': 0.85, 'USDGBP': 0.74, 'USDCAD': 1.37}
         """
         return asyncio.run(
-            self.get_rates_async(source, currencies, output_path, writer)
+            self.get_rates_async(sources, currencies, output_path, writer)
         )
 
     def _fetch_rates_sync(self, src: str, currencies: list[str]) -> CurrencyResult:

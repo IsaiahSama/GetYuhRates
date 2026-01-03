@@ -101,7 +101,7 @@ def get_rates_command(
     Command-line arguments override config file values.
 
     Args:
-        source: List of source currencies. If None, uses config file values.
+        sources: List of source currencies. If None, uses config file values.
         currencies: List of target currencies. If None, uses config file values.
         output_path: Output folder path. If None, uses config file value.
         writer: Output writer type. If None, uses config file value.
@@ -121,7 +121,7 @@ def get_rates_command(
         raise typer.Exit(code=1)
 
     # Override config with command-line arguments
-    final_source = source if source is not None else config["source"]
+    final_sources = source if source is not None else config["source"]
     final_currencies = currencies if currencies is not None else config["currencies"]
     final_output_path = (
         str(output_path) if output_path is not None else config["output_folder"]
@@ -130,7 +130,7 @@ def get_rates_command(
 
     rprint("\n[bold blue]GetYuhRates - Fetching Currency Rates[/bold blue]\n")
     rprint("=" * 60)
-    rprint(f"[cyan]Source currencies:[/cyan] {', '.join(final_source)}")
+    rprint(f"[cyan]Source currencies:[/cyan] {', '.join(final_sources)}")
     rprint(f"[cyan]Target currencies:[/cyan] {', '.join(final_currencies)}")
     rprint(f"[cyan]Output path:[/cyan] {final_output_path}")
     rprint(f"[cyan]Writer type:[/cyan] {final_writer}")
@@ -156,20 +156,16 @@ def get_rates_command(
 
         # Fetch rates for each source currency with rate limiting
         rprint("[bold]Fetching rates...[/bold]\n")
-        results = []
 
-        for _, source_currency in enumerate(final_source):
-            rprint(f"[cyan]Fetching rates for {source_currency}...[/cyan]")
+        rprint(f"[cyan]Fetching rates for {final_sources}...[/cyan]")
 
-            # Call get_rates for this specific source
-            source_results = client.get_rates(
-                source=[source_currency],
-                currencies=final_currencies,
-                output_path=final_output_path,
-                writer=writer_instance,
-            )
-
-            results.extend(source_results)
+        # Call get_rates for this specific source
+        results = client.get_rates(
+            sources=final_sources,
+            currencies=final_currencies,
+            output_path=final_output_path,
+            writer=writer_instance,
+        )
 
         # Display results
         rprint("\n[bold green]Results:[/bold green]\n")
@@ -188,7 +184,7 @@ def get_rates_command(
     except ImportError as e:
         rprint(f"[bold red]Error:[/bold red] Could not import getyuhrates package: {e}")
         rprint("\nMake sure the getyuhrates package is installed:")
-        rprint("  [cyan]pip install -e path/to/getyuhrates_package[/cyan]\n")
+        rprint("  [cyan]pip install -e ../getyuhrates_package[/cyan]\n")
         raise typer.Exit(code=1)
     except Exception as e:
         rprint(f"[bold red]Error fetching rates:[/bold red] {e}")
