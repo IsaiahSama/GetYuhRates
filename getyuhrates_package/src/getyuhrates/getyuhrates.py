@@ -32,6 +32,11 @@ class GetYuhRates:
 
     The API key is retrieved from the CURRENCYLAYER_API_KEY environment variable.
 
+    To prevent API rate-limiting errors when using multiple source currencies,
+    this client introduces a configurable delay between requests. This can be
+    controlled via the `GETYUHRATES_REQUEST_DELAY_SECONDS` environment
+    variable (defaults to 0.5 seconds).
+
     Attributes:
         api_key (str): CurrencyLayer API key from environment.
         base_url (str): Base URL for the CurrencyLayer API.
@@ -71,10 +76,13 @@ class GetYuhRates:
     ) -> list[CurrencyResult]:
         """Retrieve currency exchange rates asynchronously.
 
-        Fetches live currency exchange rates from the CurrencyLayer API for
-        multiple source currencies. Requests are made concurrently for better
-        performance. If source and target currency are identical, returns a
-        rate of 1.0 without making an API call.
+        Fetches live currency exchange rates from the CurrencyLayer API. To
+        avoid rate-limiting issues, requests for multiple source currencies are
+        made sequentially with a delay between them. This delay is configurable
+        via the `GETYUHRATES_REQUEST_DELAY_SECONDS` environment variable.
+
+        If a source and target currency are identical (e.g., source=["USD"],
+        currencies=["USD"]), it returns a rate of 1.0 without an API call.
 
         Args:
             source (list[str]): List of source currency codes (e.g., ["USD", "GBP"]).
@@ -114,13 +122,22 @@ class GetYuhRates:
         if output_path and writer is None:
             writer = CSVWriter()
 
-        # Create tasks for each source currency
-        tasks = [
-            self._fetch_rates_async(src, currencies) for src in source
-        ]
+        # Get request delay from environment variable, default to 0.5 seconds
+        try:
+            delay_seconds = float(
+                os.getenv("GETYUHRATES_REQUEST_DELAY_SECONDS", "1") or "1"
+            )
+        except (ValueError, TypeError):
+            delay_seconds = 1
 
-        # Execute all requests concurrently
-        results = await asyncio.gather(*tasks)
+        # Process sources sequentially with a delay to avoid rate-limiting
+        results: list[CurrencyResult] = []
+        for i, src in enumerate(source):
+            result = await self._fetch_rates_async(src, currencies)
+            results.append(result)
+            # Do not sleep after the last request
+            if i < len(source) - 1:
+                await asyncio.sleep(delay_seconds)
 
         # Write to file if output path is provided
         if output_path and writer:
@@ -180,7 +197,9 @@ class GetYuhRates:
 
                     if data.get("success"):
                         # Cast to the expected type after validation
-                        quotes: dict[str, float] = cast(dict[str, float], data.get("quotes", {}))
+                        quotes: dict[str, float] = cast(
+                            dict[str, float], data.get("quotes", {})
+                        )
                         return {
                             "success": True,
                             "source": src,
@@ -191,7 +210,9 @@ class GetYuhRates:
                         }
                     else:
                         # Extract error information with proper casting
-                        error_info: dict[str, Any] = cast(dict[str, Any], data.get("error", {}))
+                        error_info: dict[str, Any] = cast(
+                            dict[str, Any], data.get("error", {})
+                        )
                         error_msg: str = str(error_info.get("info", "Unknown error"))
                         return {
                             "success": False,
@@ -298,7 +319,9 @@ class GetYuhRates:
 
             if data.get("success"):
                 # Cast to the expected type after validation
-                quotes: dict[str, float] = cast(dict[str, float], data.get("quotes", {}))
+                quotes: dict[str, float] = cast(
+                    dict[str, float], data.get("quotes", {})
+                )
                 return {
                     "success": True,
                     "source": src,
