@@ -211,14 +211,6 @@ Since the CurrencyLayer API only supports a single source currency per request, 
 - pyyaml
 - python-dotenv
 
-## Development
-
-See the main project [CLAUDE.md](../CLAUDE.md) for development guidelines and coding standards.
-
-## License
-
-[Add your license here]
-
 ## Links
 
 - [CurrencyLayer API Documentation](https://currencylayer.com/documentation)

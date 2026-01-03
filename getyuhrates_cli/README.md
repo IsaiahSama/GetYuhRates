@@ -182,88 +182,6 @@ recipients:
   - user2@mail.com
 subject_title: "Today's Currency Rates"
 email_body: "Here are the currency rates for today!"
-
-# Rate Limiting Configuration
-rate_limit:
-  enabled: true
-  delay_seconds: 1.0  # Delay between API requests
-  respect_headers: true  # Adjust based on API response headers
-```
-
-### Rate Limiting
-
-The CLI includes built-in rate limiting to prevent excessive API requests and respect API quotas. Rate limiting is configured in the `config.yaml` file and is enabled by default.
-
-**Configuration Options:**
-
-- `enabled` (boolean): Enable or disable rate limiting. Default: `true`
-- `delay_seconds` (float): Time to wait between consecutive API requests in seconds. Default: `1.0`
-- `respect_headers` (boolean): Dynamically adjust delays based on API response headers (X-RateLimit-*). Default: `true`
-
-**How It Works:**
-
-1. **Delay Between Requests**: When fetching rates for multiple source currencies, the CLI waits the configured delay between each API call
-2. **Header-Based Adjustment**: If `respect_headers` is enabled, the CLI monitors API response headers:
-   - When requests remaining drops below 50, delays increase by 50%
-   - When requests remaining drops below 10, delays double
-   - When quota is exhausted, the CLI waits until the rate limit resets
-3. **Progress Messages**: The CLI displays user-friendly messages showing wait times and rate limit status
-
-**Bypassing Rate Limiting:**
-
-For development or testing purposes, you can bypass rate limiting using the `--no-rate-limit` flag:
-
-```bash
-python main.py get-rates --no-rate-limit
-```
-
-**Example Output:**
-
-```
-Rate limiting enabled: 1.0s delay between requests
-
-GetYuhRates - Fetching Currency Rates
-
-============================================================
-Source currencies: USD, GBP
-Target currencies: EUR, CAD, PLN
-Output path: ./reports/
-Writer type: CSV
-============================================================
-
-Fetching rates...
-
-Fetching rates for USD...
-Rate limit: waiting 1.0s before next request
-Fetching rates for GBP...
-API rate limit: 248/250 requests used
-
-Results:
-...
-```
-
-**Customizing Rate Limits:**
-
-To adjust rate limiting behavior, edit your `config.yaml`:
-
-```yaml
-# More aggressive rate limiting (2 second delay)
-rate_limit:
-  enabled: true
-  delay_seconds: 2.0
-  respect_headers: true
-
-# Disable rate limiting entirely (not recommended for production)
-rate_limit:
-  enabled: false
-  delay_seconds: 1.0
-  respect_headers: false
-
-# Simple delay without header awareness
-rate_limit:
-  enabled: true
-  delay_seconds: 0.5
-  respect_headers: false
 ```
 
 ### Environment Variables
@@ -303,12 +221,10 @@ Fetch currency exchange rates from the CurrencyLayer API.
 - `--output-path`, `-o`: Output folder path for generated reports
 - `--writer`, `-w`: Output writer type (CSV or PDF)
 - `--config`: Path to config.yaml file (default: ./config.yaml)
-- `--no-rate-limit`: Bypass rate limiting for API requests
 
 **Behavior:**
 - Loads defaults from `config.yaml`
 - Command-line arguments override config file values
-- Applies rate limiting between API requests (unless `--no-rate-limit` is set)
 - Saves output files to the specified output folder
 - Displays results in the console with progress indicators
 
@@ -342,7 +258,7 @@ All code is fully typed using Python 3.12 type hints, following best practices a
 
 To add new commands:
 
-1. Add the command function to `getyuhrates/commands.py`
+1. Add the command function to `getyuhratescli/commands.py`
 2. Register the command in `main.py`
 3. Update this README with the new command documentation
 
@@ -367,7 +283,7 @@ cp .env.example .env
 
 Install the getyuhrates package:
 ```bash
-pip install -e path/to/getyuhrates_package
+pip install -e ../getyuhrates_package
 ```
 
 ## License

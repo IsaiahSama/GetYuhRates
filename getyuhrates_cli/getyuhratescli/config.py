@@ -6,23 +6,10 @@ and environment variables from .env files.
 
 import os
 from pathlib import Path
-from typing import NotRequired, TypedDict
+from typing import TypedDict
 
 import yaml
 from dotenv import load_dotenv
-
-
-class RateLimitConfig(TypedDict):
-    """Rate limiting configuration.
-
-    Attributes:
-        enabled: Whether rate limiting is enabled.
-        delay_seconds: Delay between API requests in seconds.
-        respect_headers: Whether to adjust delays based on API response headers.
-    """
-    enabled: bool
-    delay_seconds: float
-    respect_headers: bool
 
 
 class Config(TypedDict):
@@ -39,8 +26,8 @@ class Config(TypedDict):
         recipients: List of recipient email addresses.
         subject_title: Email subject line.
         email_body: Email body text.
-        rate_limit: Rate limiting configuration (optional).
     """
+
     source: list[str]
     currencies: list[str]
     always_download: str
@@ -51,16 +38,17 @@ class Config(TypedDict):
     recipients: list[str]
     subject_title: str
     email_body: str
-    rate_limit: NotRequired[RateLimitConfig]
 
 
 class ConfigLoadError(Exception):
     """Exception raised when configuration cannot be loaded."""
+
     pass
 
 
 class ConfigValidationError(Exception):
     """Exception raised when configuration is invalid."""
+
     pass
 
 
@@ -96,34 +84,6 @@ def get_api_key() -> str:
             "Please check your .env file."
         )
     return api_key
-
-
-def get_rate_limit_config(config: Config) -> RateLimitConfig:
-    """Get rate limiting configuration with sensible defaults.
-
-    Args:
-        config: Loaded configuration dictionary.
-
-    Returns:
-        RateLimitConfig: Rate limiting configuration with defaults applied.
-    """
-    default_config: RateLimitConfig = {
-        "enabled": True,
-        "delay_seconds": 1.0,
-        "respect_headers": True,
-    }
-
-    if "rate_limit" not in config:
-        return default_config
-
-    rate_limit = config["rate_limit"]
-
-    # Merge with defaults, allowing partial overrides
-    return {
-        "enabled": rate_limit.get("enabled", default_config["enabled"]),
-        "delay_seconds": rate_limit.get("delay_seconds", default_config["delay_seconds"]),
-        "respect_headers": rate_limit.get("respect_headers", default_config["respect_headers"]),
-    }
 
 
 def load_config(config_path: Path | None = None) -> Config:
@@ -190,7 +150,9 @@ def load_config(config_path: Path | None = None) -> Config:
     return config_data  # type: ignore[return-value]
 
 
-def validate_config(config_path: Path | None = None, env_path: Path | None = None) -> tuple[bool, str]:
+def validate_config(
+    config_path: Path | None = None, env_path: Path | None = None
+) -> tuple[bool, str]:
     """Validate configuration file and environment variables.
 
     Args:

@@ -3,7 +3,6 @@
 This module contains the implementation of all CLI commands.
 """
 
-import time
 from pathlib import Path
 
 import typer
@@ -11,12 +10,10 @@ from rich import print as rprint
 from rich.console import Console
 
 from getyuhratescli.config import (
-    get_rate_limit_config,
     load_config,
     load_env_file,
     validate_config,
 )
-from getyuhratescli.rate_limiter import RateLimiter
 
 console = Console()
 config_app = typer.Typer(help="Configuration management commands")
@@ -97,11 +94,6 @@ def get_rates_command(
         "--config",
         help="Path to config.yaml file",
     ),
-    no_rate_limit: bool = typer.Option(
-        False,
-        "--no-rate-limit",
-        help="Bypass rate limiting for API requests",
-    ),
 ) -> None:
     """Get currency exchange rates from CurrencyLayer API.
 
@@ -114,7 +106,6 @@ def get_rates_command(
         output_path: Output folder path. If None, uses config file value.
         writer: Output writer type. If None, uses config file value.
         config_path: Path to config.yaml file.
-        no_rate_limit: If True, bypasses rate limiting for API requests.
 
     Returns:
         None: Writes output files and prints results to console.
@@ -137,23 +128,6 @@ def get_rates_command(
     )
     final_writer = writer if writer is not None else config["output_format"]
 
-    # Get rate limit configuration
-    rate_limit_config = get_rate_limit_config(config)
-
-    # Create rate limiter if enabled and not bypassed
-    rate_limiter: RateLimiter | None = None
-    if rate_limit_config["enabled"] and not no_rate_limit:
-        rate_limiter = RateLimiter(
-            delay_seconds=rate_limit_config["delay_seconds"],
-            respect_headers=rate_limit_config["respect_headers"],
-        )
-        rprint(
-            f"[dim]Rate limiting enabled: {rate_limit_config['delay_seconds']}s delay between requests[/dim]"
-        )
-    elif no_rate_limit:
-        rprint("[dim yellow]Rate limiting bypassed via --no-rate-limit flag[/dim yellow]")
-
-    # Display configuration
     rprint("\n[bold blue]GetYuhRates - Fetching Currency Rates[/bold blue]\n")
     rprint("=" * 60)
     rprint(f"[cyan]Source currencies:[/cyan] {', '.join(final_source)}")
@@ -184,11 +158,7 @@ def get_rates_command(
         rprint("[bold]Fetching rates...[/bold]\n")
         results = []
 
-        for idx, source_currency in enumerate(final_source):
-            # Apply rate limiting before each API call (except the first one)
-            if rate_limiter is not None and idx > 0:
-                rate_limiter.wait_if_needed()
-
+        for _, source_currency in enumerate(final_source):
             rprint(f"[cyan]Fetching rates for {source_currency}...[/cyan]")
 
             # Call get_rates for this specific source
@@ -198,15 +168,6 @@ def get_rates_command(
                 output_path=final_output_path,
                 writer=writer_instance,
             )
-
-            # If rate limiter is enabled and we got results, try to extract headers
-            # Note: This assumes the API client might provide response metadata
-            # Since we don't have direct access to response headers from the package,
-            # we'll skip header-based rate limiting for now. The delay-based limiting
-            # will still work.
-            if rate_limiter is not None:
-                # Update last request time after successful call
-                rate_limiter.last_request_time = time.time()
 
             results.extend(source_results)
 
